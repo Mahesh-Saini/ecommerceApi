@@ -13,6 +13,15 @@ const MONGODB_URI = process.env.mongodbUri;
 
 mongodbConnection(MONGODB_URI);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`👽 Server is running on localhost:${PORT}`);
+});
+
+//unhandled promise rejection
+process.on("unhandledRejection", (err) => {
+  console.log(`Error 💥💥💥 : ${err.message}`);
+  console.log(`Shutting down the server due to unhandled Promise Rejection`);
+  server.close(() => {
+    process.exit(1);
+  });
 });
