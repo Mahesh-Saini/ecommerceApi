@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+
 import app from "./app.js";
 import { mongodbConnection } from "./db.js";
 

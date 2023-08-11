@@ -2,6 +2,7 @@ import TextData from "../models/testingModel.js";
 
 export const getReq = async (req, res) => {
   const data = await TextData.find();
+
   res.status(200).json({
     success: true,
     data,
