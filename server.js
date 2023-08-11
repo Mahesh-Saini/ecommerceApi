@@ -16,6 +16,10 @@ app.get("/", (req, res) => {
   res.send("hey i am listing..");
 });
 
+app.post("/", (req, res) => {
+  res.send(req.body);
+});
+
 app.listen(PORT, () => {
   console.log(`👽 Server is running on localhost:${PORT}`);
 });
