@@ -4,6 +4,13 @@ import testingRouter from "./routes/testingRoute.js";
 import productRouter from "./routes/productRoute.js";
 import errorMiddleware from "./middlewares/error.js";
 
+//handle uncaught Exception
+process.on("uncaughtException", (err) => {
+  console.log(`Error 💥💥💥 : ${err.message}`);
+  console.log(`Shutting down the server due to uncaughtException`);
+  process.exit(1);
+});
+
 const app = express();
 
 app.use(express.json());

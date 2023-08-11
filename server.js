@@ -14,7 +14,7 @@ const MONGODB_URI = process.env.mongodbUri;
 mongodbConnection(MONGODB_URI);
 
 const server = app.listen(PORT, () => {
-  console.log(`👽 Server is running on localhost:${PORT}`);
+  console.log(`👼👼👼 Server is running on localhost:${PORT}`);
 });
 
 //unhandled promise rejection
