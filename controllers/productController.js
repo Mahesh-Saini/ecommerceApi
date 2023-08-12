@@ -7,7 +7,14 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
   console.log(req.query);
   if (req.query.search) {
     products = await Product.find({ title: { $regex: req.query.search } });
-  } else {
+  }
+  if ((req.query.category && req.query.subCategory) || req.query.category) {
+    products = await Product.find({
+      category: req.query.category,
+      subCategory: req.query.subCategory,
+    });
+  }
+  if (!products) {
     products = await Product.find();
   }
   if (!products) {
