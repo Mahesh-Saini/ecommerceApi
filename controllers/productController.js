@@ -96,7 +96,7 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
     req.params.id,
     req.body,
     {
-      isModified: true,
+      new: true,
     }
   );
   return res.status(200).json({
