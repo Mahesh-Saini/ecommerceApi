@@ -2,6 +2,7 @@ import express from "express";
 
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
+import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
 import errorMiddleware from "./middlewares/error.js";
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/order", orderRouter);
 
 //error middleware
 app.use(errorMiddleware);
