@@ -3,12 +3,19 @@ import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../middlewares/catchAsyncError.js";
 
 export const getAllProducts = catchAsyncError(async (req, res, next) => {
-  const products = await Product.find();
+  let products;
+  console.log(req.query);
+  if (req.query.search) {
+    products = await Product.find({ title: { $regex: req.query.search } });
+  } else {
+    products = await Product.find();
+  }
   if (!products) {
     return next(new ErrorHandler("Product not found", 404));
   }
   return res.status(200).json({
     success: true,
+    count: products.length,
     products,
   });
 });
