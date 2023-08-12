@@ -12,10 +12,29 @@ export const getAllOrders = catchAsyncError(async (req, res, next) => {
 });
 
 export const addOrder = catchAsyncError(async (req, res, next) => {
-  const order = new Order(req.body);
+  const {
+    shippingInfo,
+    orderItems,
+    userId,
+    itemsPrice,
+    taxPrice,
+    shippingCharge,
+    totalPrice,
+  } = req.body;
+  const order = new Order({
+    shippingInfo,
+    orderItems,
+    userId,
+    itemsPrice,
+    taxPrice,
+    shippingCharge,
+    totalPrice,
+    paidAt: Date.now,
+    userId: req.user._id,
+  });
   const savedOrder = await order.save();
 
-  return res.status(200).json({
+  return res.status(201).json({
     success: true,
     savedOrder,
   });

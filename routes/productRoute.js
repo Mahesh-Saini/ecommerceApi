@@ -7,16 +7,17 @@ import {
   updateProduct,
   addProduct,
 } from "../controllers/productController.js";
+import { isAuthenticatedUser } from "../controllers/authController.js";
 
 const router = express.Router();
 
 router.get("/all", getAllProducts);
-router.post("/add", addProduct);
+router.post("/add", isAuthenticatedUser, addProduct);
 
 router
   .route("/:id")
   .get(getSingleProduct)
-  .delete(deleteProduct)
-  .put(updateProduct);
+  .delete(isAuthenticatedUser, deleteProduct)
+  .put(isAuthenticatedUser, updateProduct);
 
 export default router;

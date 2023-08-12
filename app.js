@@ -1,9 +1,11 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
 import userRouter from "./routes/userRoute.js";
+import authRouter from "./routes/authRoute.js";
 import errorMiddleware from "./middlewares/error.js";
 
 //handle uncaught Exception
@@ -16,11 +18,13 @@ process.on("uncaughtException", (err) => {
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 //routes
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/order", orderRouter);
 
 //error middleware

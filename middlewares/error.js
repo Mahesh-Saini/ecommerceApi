@@ -1,7 +1,7 @@
 import ErrorHandler from "../utils/errorHandler.js";
 
 export default (err, req, res, next) => {
-  console.log("💥💥💥💥💥💥💥💥");
+  // console.log("💥💥💥💥💥💥💥💥");
 
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Internal server error";

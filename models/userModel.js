@@ -1,21 +1,44 @@
 import mongoose from "mongoose";
+import validator from "validator";
 
-const user = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
-    type: Object,
+    type: String,
+    required: [true, "Username is required please enter it."],
+    trim: true,
+    maxLength: [30, "30 chars"],
+    minLength: [4, "4 chars"],
   },
   email: {
     type: String,
+    required: [true, "Email is required please enter it."],
+    unique: true,
+    validate: [validator.isEmail, "please enter a valid email"],
   },
   password: {
     type: String,
+    required: [true, "Password is required please enter it."],
+    maxLength: [200, "30 chars"],
+    minLength: [8, "4 chars"],
+    select: false,
   },
-  confirmPassword: {
+  avatar: {
+    publicId: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },
+  role: {
+    type: String,
+    default: "user",
+  },
+  resetPasswordToken: {
     type: String,
   },
-  isAdmin: {
-    type: String,
-    default: false,
+  resetPasswordExpire: {
+    type: Date,
   },
   createdAt: {
     type: Date,
@@ -23,4 +46,4 @@ const user = mongoose.Schema({
   },
 });
 
-export default mongoose.model("User", user);
+export default mongoose.model("User", userSchema);
