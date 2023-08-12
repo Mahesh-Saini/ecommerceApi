@@ -4,7 +4,7 @@ import catchAsyncError from "../middlewares/catchAsyncError.js";
 
 export const getAllProducts = catchAsyncError(async (req, res, next) => {
   let products;
-  console.log(req.query);
+
   if (req.query.search) {
     products = await Product.find({ title: { $regex: req.query.search } });
   }
@@ -12,6 +12,23 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
     products = await Product.find({
       category: req.query.category,
       subCategory: req.query.subCategory,
+    });
+  }
+  if (req.query.lowestPrice == 0) {
+    req.query.lowestPrice = 1;
+  }
+
+  if (req.query.lowestPrice && req.query.highestPrice) {
+    products = await Product.find({
+      $and: [
+        { sellingPrice: { $gte: req.query.lowestPrice } },
+        { sellingPrice: { $lte: req.query.highestPrice } },
+      ],
+    });
+  }
+  if (req.query.rating) {
+    products = await Product.find({
+      rating: { $gte: req.query.rating },
     });
   }
   if (!products) {
