@@ -25,11 +25,20 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
         { sellingPrice: { $lte: req.query.highestPrice } },
       ],
     });
+    products = products.sort((a, b) => b.sellingPrice - a.sellingPrice);
   }
   if (req.query.rating) {
     products = await Product.find({
       rating: { $gte: req.query.rating },
     });
+    products = products.sort((a, b) => b.rating - a.rating);
+  }
+  if (req.query.page) {
+    const currentPage = req.query.page;
+    const limit = req.query.limit || 10;
+    const skip = (currentPage - 1) * limit;
+
+    products = await Product.find().limit(limit).skip(skip);
   }
   if (!products) {
     products = await Product.find();
