@@ -65,6 +65,7 @@ export const getSingleProduct = catchAsyncError(async (req, res, next) => {
 });
 
 export const addProduct = catchAsyncError(async (req, res, next) => {
+  req.body.user = req.user.id;
   const product = await Product.create(req.body);
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));

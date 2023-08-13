@@ -92,10 +92,14 @@ const product = mongoose.Schema({
   depth: {
     type: Number,
   },
-
   rating: {
     type: Number,
     default: 0,
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: true,
   },
   createdAt: {
     type: Date,

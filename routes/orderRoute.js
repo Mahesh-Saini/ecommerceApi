@@ -6,12 +6,16 @@ import {
   updateOrder,
   deleteOrder,
 } from "../controllers/orderController.js";
+import { isAuthenticatedUser } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/all", getAllOrders);
-router.post("/add", addOrder);
+router.get("/all", isAuthenticatedUser, getAllOrders);
+router.post("/add", isAuthenticatedUser, addOrder);
 
-router.route("/:id").put(updateOrder).delete(deleteOrder);
+router
+  .route("/:id")
+  .put(isAuthenticatedUser, updateOrder)
+  .delete(isAuthenticatedUser, deleteOrder);
 
 export default router;
