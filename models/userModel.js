@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import CryptoJS from "crypto-js";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -21,6 +23,10 @@ const userSchema = new mongoose.Schema({
     maxLength: [200, "30 chars"],
     minLength: [8, "4 chars"],
     select: false,
+  },
+  key: {
+    type: String,
+    required: true,
   },
   avatar: {
     publicId: {
@@ -48,6 +54,21 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+});
+
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+  }
+  if (this.isModified()) {
+    this.key = CryptoJS.AES.encrypt(
+      this.id,
+      process.env.USER_IDENTITY_KEY
+    ).toString();
+    next();
+  }
+  next();
 });
 
 export default mongoose.model("User", userSchema);

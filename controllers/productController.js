@@ -1,6 +1,7 @@
 import Product from "../models/productModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../middlewares/catchAsyncError.js";
+import { sendResponse } from "../utils/response.js";
 
 export const getAllProducts = catchAsyncError(async (req, res, next) => {
   let products;
@@ -65,15 +66,22 @@ export const getSingleProduct = catchAsyncError(async (req, res, next) => {
 });
 
 export const addProduct = catchAsyncError(async (req, res, next) => {
-  req.body.user = req.user.id;
-  const product = await Product.create(req.body);
+  const discount = req.body.actualPrice - req.body.sellingPrice;
+  const discountPercentage = Math.floor(
+    (discount / req.body.actualPrice) * 100,
+    2
+  );
+  let product = new Product({
+    ...req.body,
+    userId: req.user.id,
+    discount,
+    discountPercentage,
+  });
+  product = await product.save();
   if (!product) {
     return next(new ErrorHandler("Product not found", 404));
   }
-  return res.status(200).json({
-    success: true,
-    product,
-  });
+  sendResponse(res, 200, { success: true, product });
 });
 
 export const deleteProduct = catchAsyncError(async (req, res, next) => {

@@ -7,6 +7,7 @@ const product = mongoose.Schema({
     maxLength: [200, "Title should be less than 200chars"],
     minLength: [20, "Title should be greater than 20chars"],
     trim: true,
+    unique: true,
   },
   description: {
     type: String,
@@ -28,6 +29,9 @@ const product = mongoose.Schema({
     min: [1, "Actual price should be greater than or equal to 1 Rupees"],
   },
   discount: {
+    type: Number,
+  },
+  discountPercentage: {
     type: Number,
   },
   category: {
@@ -96,7 +100,7 @@ const product = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  user: {
+  userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
     required: true,

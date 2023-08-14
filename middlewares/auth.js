@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import CryptoJS from "crypto-js";
 
 import User from "../models/userModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
@@ -25,8 +26,16 @@ export const isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Please login to access resource", 404));
   }
 
-  const { id } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
+  const { key } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-  req.user = await User.findById(id);
+  const bytes = CryptoJS.AES.decrypt(key, process.env.USER_IDENTITY_KEY);
+  const id = bytes.toString(CryptoJS.enc.Utf8);
+
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+  const { password: passwordHash, _id, isActive, ...userData } = user._doc;
+  req.user = userData;
   next();
 });

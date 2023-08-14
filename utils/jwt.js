@@ -6,7 +6,7 @@ export const generateJwtTokenAndSetCookie = async (
   statusCode,
   msg
 ) => {
-  const token = await jwt.sign({ id: user.id }, process.env.JWT_SECRET_KEY, {
+  const token = await jwt.sign({ key: user.key }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE_TIME,
   });
 
