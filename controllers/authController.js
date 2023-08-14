@@ -1,11 +1,12 @@
 import crypto from "crypto";
 
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import User from "../models/userModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../middlewares/catchAsyncError.js";
-import { generateJwtTokenAndSetCookie } from "../utils/jwtToken.js";
+import { generateJwtTokenAndSetCookie } from "../utils/jwt.js";
 import { sendMail } from "../utils/mail.js";
 
 export const register = catchAsyncError(async (req, res, next) => {
@@ -30,6 +31,20 @@ export const register = catchAsyncError(async (req, res, next) => {
 });
 
 export const login = catchAsyncError(async (req, res, next) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    const { id } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
+    if (id) {
+      return next(
+        new ErrorHandler(
+          "You are already logged in.no need to login again",
+          400
+        )
+      );
+    }
+  }
+
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -37,17 +52,16 @@ export const login = catchAsyncError(async (req, res, next) => {
   }
   const user = await User.findOne({ email }).select("+password");
   if (!user) {
-    return next(new ErrorHandler("Invalid email or password", 400));
+    return next(new ErrorHandler("User not found", 404));
   }
-  const hashedPassword = user.password;
 
-  const isValidPassword = await bcrypt.compare(password, hashedPassword);
+  const isValidPassword = await bcrypt.compare(password, user.password);
 
   if (!isValidPassword) {
     return next(new ErrorHandler("Invalid email or password", 400));
   }
 
-  generateJwtTokenAndSetCookie(user, res, 201, "You are logged in");
+  generateJwtTokenAndSetCookie(user, res, 200, "You are logged in");
 });
 
 export const logout = catchAsyncError(async (req, res, next) => {
@@ -72,12 +86,12 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 
   //generating token
   const randomHex = crypto.randomBytes(20).toString("hex");
-  const randomHash = crypto
+  const generateHash = crypto
     .createHash("sha256")
     .update(randomHex)
     .digest("hex");
 
-  user.resetPasswordToken = randomHash;
+  user.resetPasswordToken = generateHash;
   user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
   await user.save();
 
@@ -95,12 +109,12 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 
 export const resetPassword = catchAsyncError(async (req, res, next) => {
   const randomHex = req.params.token;
-  const randomHash = crypto
+  const generateHash = crypto
     .createHash("sha256")
     .update(randomHex)
     .digest("hex");
   const user = await User.findOne({
-    resetPasswordToken: randomHash,
+    resetPasswordToken: generateHash,
     resetPasswordExpire: { $gt: Date.now() },
   });
   if (!user) {
@@ -138,20 +152,13 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
       new ErrorHandler("Invalid input please provide a write input", 400)
     );
   }
+  if (email !== req.user.email) {
+    return next(new ErrorHandler("Email or Password is wrong", 400));
+  }
   if (!(newPassword.length >= 8 && confirmPassword.length >= 8)) {
     return next(
       new ErrorHandler("password should be greater than 8 chars", 400)
     );
-  }
-
-  if (email !== req.user.email) {
-    return next(new ErrorHandler("Email or Password is wrong", 400));
-  }
-
-  const isValidPassword = await bcrypt.compare(password, req.user.password);
-
-  if (!isValidPassword) {
-    return next(new ErrorHandler("Email or Password is wrong", 400));
   }
   if (newPassword !== confirmPassword) {
     return next(
@@ -159,19 +166,17 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
     );
   }
 
-  const user = await User.findByIdAndUpdate(
-    { _id: req.user.id },
-    {
-      password: await bcrypt.hash(newPassword, 12),
-    },
-    { new: true }
-  );
-
+  const user = await User.findOne({ email }).select("+password");
   if (!user) {
-    return next(
-      new ErrorHandler("password not channged something went worng", 400)
-    );
+    return next(new ErrorHandler("User not found", 404));
   }
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword) {
+    return next(new ErrorHandler("Email or Password is wrong", 400));
+  }
+  user.password = await bcrypt.hash(newPassword, 12);
+  await user.save();
 
   generateJwtTokenAndSetCookie(user, res, 201, "password changed in logged in");
 });
