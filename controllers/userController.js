@@ -1,38 +1,88 @@
 import User from "../models/userModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchAsyncError from "../middlewares/catchAsyncError.js";
+import { sendResponse } from "../utils/response.js";
 
 export const getAllUsers = catchAsyncError(async (req, res, next) => {
   const users = await User.find();
+  if (!users) {
+    return next(new ErrorHandler("User not found", 404));
+  }
 
-  return res.status(200).json({
-    success: true,
-    users,
-  });
+  sendResponse(res, 200, { success: true, users, count: users.length });
 });
 
-export const addUser = catchAsyncError(async (req, res, next) => {
-  const user = new User(req.body);
-  const savedUser = await user.save();
-
-  return res.status(200).json({
-    success: true,
-    savedUser,
-  });
-});
-
-export const updateUser = catchAsyncError(async (req, res, next) => {
-  let user = await User.findById(req.params.id);
+export const getSingleUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
   }
-  user = await User.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
 
-  return res.status(200).json({
+  sendResponse(res, 200, { success: true, user });
+});
+
+export const updateUser = catchAsyncError(async (req, res, next) => {
+  const { username, publicId, url } = req.body;
+  let user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  if (username) {
+    user.username = username;
+  } else if (publicId && url) {
+    user.avatar.publicId = publicId;
+    user.avatar.url = url;
+  } else {
+    return next(new ErrorHandler("Please provide a input", 404));
+  }
+
+  user = await user.save();
+
+  sendResponse(res, 200, { success: true, user });
+});
+
+export const inactiveUser = catchAsyncError(async (req, res, next) => {
+  const { inactive } = req.body;
+  let user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  if (!inactive) {
+    return next(new ErrorHandler("Please provide a input", 400));
+  }
+  if (!user.isActive) {
+    return next(new ErrorHandler("You are already inactive user.", 400));
+  }
+  user.isActive = false;
+  user = await user.save();
+
+  sendResponse(res, 200, {
     success: true,
-    user,
+    message: "you account has been inactive",
+  });
+});
+
+export const activeUser = catchAsyncError(async (req, res, next) => {
+  const { active } = req.body;
+  let user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  if (!active) {
+    return next(new ErrorHandler("Please provide a input", 400));
+  }
+  if (user.isActive) {
+    return next(new ErrorHandler("You are already active user.", 400));
+  }
+  user.isActive = true;
+  user = await user.save();
+
+  sendResponse(res, 200, {
+    success: true,
+    message: "you account has been inactive",
   });
 });
 
@@ -43,8 +93,8 @@ export const deleteUser = catchAsyncError(async (req, res, next) => {
   }
   await User.findByIdAndDelete(req.params.id);
 
-  return res.status(200).json({
+  sendResponse(res, 200, {
     success: true,
-    message: "User deleted succesfully!",
+    message: "Your account deleted succesfully!",
   });
 });
