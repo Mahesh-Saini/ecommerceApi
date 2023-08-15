@@ -13,7 +13,8 @@ export const generateJwtTokenAndSetCookie = async (
   //cookie options
   const cookieOptions = {
     httpOnly: true,
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 1),
+    // expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 1),
+    expires: new Date(Date.now() + 60 * 1000 * 1),
   };
 
   return res.status(statusCode).cookie("token", token, cookieOptions).json({

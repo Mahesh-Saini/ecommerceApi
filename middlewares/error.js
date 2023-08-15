@@ -3,14 +3,16 @@ import ErrorHandler from "../utils/errorHandler.js";
 export default (err, req, res, next) => {
   // console.log("💥💥💥💥💥💥💥💥");
   // console.log(err.name);
-  // console.log(err.type);
   // console.log(err.message);
-  // console.log(err.code);
-  // console.log(typeof err.code);
-  // console.log(err.path);
+  // console.log(typeof err);
   // console.log(err);
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Internal server error";
+
+  //mongodb wrong id error
+  if (err.name === "TokenExpiredError" && err.message === "jwt expired") {
+    err.message = `Json web token expired you has been expired you need to login again.`;
+  }
 
   //mongodb wrong id error
   if (err.name === "CastError") {
@@ -25,7 +27,7 @@ export default (err, req, res, next) => {
   }
 
   return res.status(err.statusCode).json({
-    sucess: false,
+    sucess: true,
     message: err.stack,
   });
 };

@@ -6,7 +6,7 @@ import { sendResponse } from "../utils/response.js";
 export const getAllUsers = catchAsyncError(async (req, res, next) => {
   const users = await User.find();
   if (!users) {
-    return next(new ErrorHandler("User not found", 404));
+    return next(new ErrorHandler("Users not found", 404));
   }
 
   sendResponse(res, 200, { success: true, users, count: users.length });

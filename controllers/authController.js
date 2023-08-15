@@ -14,16 +14,14 @@ export const register = catchAsyncError(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (token) {
-    const { key } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
-    if (key) {
-      return next(
-        new ErrorHandler(
-          "You are already logged in no need to register again or if you want to create another account so please logout first",
-          400
-        )
-      );
-    }
+    return next(
+      new ErrorHandler(
+        "You are already logged in no need to register again or if you want to create another account so please logout first",
+        400
+      )
+    );
   }
+
   const { username, email, password } = req.body;
 
   let user = new User({
@@ -50,15 +48,9 @@ export const login = catchAsyncError(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (token) {
-    const { key } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
-    if (key) {
-      return next(
-        new ErrorHandler(
-          "You are already logged in no need to login again",
-          400
-        )
-      );
-    }
+    return next(
+      new ErrorHandler("You are already logged in no need to login again", 400)
+    );
   }
 
   const { email, password } = req.body;

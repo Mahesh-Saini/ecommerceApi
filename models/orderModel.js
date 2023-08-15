@@ -5,7 +5,7 @@ const order = mongoose.Schema({
     address: {
       type: String,
     },
-    landmark: {
+    landmarkArea: {
       type: String,
     },
     longnitude: {
@@ -33,8 +33,12 @@ const order = mongoose.Schema({
       type: Number,
     },
   },
-  orderItems: [
+  orderProductInfo: [
     {
+      productId: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Product",
+      },
       title: {
         type: String,
       },
@@ -47,28 +51,40 @@ const order = mongoose.Schema({
       img: {
         type: String,
       },
-      productId: {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
-      },
     },
   ],
-  userId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
-  },
   paymentInfo: {
-    id: {
+    paymentId: {
       type: String,
+    },
+    paymentType: {
+      type: String,
+      enum: ["cod", "ot"], //cod = case on delivery ot = order time
     },
     status: {
       type: String,
+      enum: ["pending", "done"],
+    },
+    paidAt: {
+      type: Date,
     },
   },
-  paidAt: {
-    type: Number,
+  orderInfo: {
+    userId: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+    },
+    orderStatus: {
+      type: String,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    deliverdAt: {
+      type: Date,
+    },
   },
-
   itemsPrice: {
     type: Number,
   },
@@ -80,16 +96,6 @@ const order = mongoose.Schema({
   },
   totalPrice: {
     type: Number,
-  },
-  orderStatus: {
-    type: String,
-  },
-  deliverdAt: {
-    type: Date,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
   },
 });
 
