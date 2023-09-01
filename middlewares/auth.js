@@ -23,19 +23,16 @@ export const isAuthenticatedUser = catchAsyncError(async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return next(new ErrorHandler("Please login to access resource", 404));
+    return next(new ErrorHandler("Please login to access this resource", 404));
   }
 
-  const { key } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-  const bytes = CryptoJS.AES.decrypt(key, process.env.USER_IDENTITY_KEY);
-  const id = bytes.toString(CryptoJS.enc.Utf8);
+  const { id } = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
   const user = await User.findById(id);
   if (!user) {
     return next(new ErrorHandler("User not found.", 404));
   }
-  const { password: passwordHash, _id, isActive, ...userData } = user._doc;
-  req.user = userData;
+
+  req.user = user;
   next();
 });

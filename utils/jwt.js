@@ -6,15 +6,18 @@ export const generateJwtTokenAndSetCookie = async (
   statusCode,
   msg
 ) => {
-  const token = await jwt.sign({ key: user.key }, process.env.JWT_SECRET_KEY, {
-    expiresIn: process.env.JWT_EXPIRE_TIME,
+  const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+  const JWT_EXPIRE_TIME = process.env.JWT_EXPIRE_TIME;
+  const COOKIE_EXPIRE_TIME = new Date(Date.now() + 24 * 60 * 60 * 1000 * 1);
+
+  const token = await jwt.sign({ id: user._id }, JWT_SECRET_KEY, {
+    expiresIn: JWT_EXPIRE_TIME,
   });
 
   //cookie options
   const cookieOptions = {
     httpOnly: true,
-    // expires: new Date(Date.now() + 24 * 60 * 60 * 1000 * 1),
-    expires: new Date(Date.now() + 60 * 1000 * 1),
+    expires: COOKIE_EXPIRE_TIME,
   };
 
   return res.status(statusCode).cookie("token", token, cookieOptions).json({

@@ -9,10 +9,12 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
   if (req.query.search) {
     products = await Product.find({ title: { $regex: req.query.search } });
   }
-  if ((req.query.category && req.query.subCategory) || req.query.category) {
+
+  if (req.query.category && req.query.subcategory && req.query.item) {
     products = await Product.find({
       category: req.query.category,
-      subCategory: req.query.subCategory,
+      subCategory: req.query.subcategory,
+      subCategory: req.query.item,
     });
   }
   if (req.query.lowestPrice == 0) {
@@ -47,9 +49,12 @@ export const getAllProducts = catchAsyncError(async (req, res, next) => {
   if (!products) {
     return next(new ErrorHandler("Product not found", 404));
   }
+  let totalCount = await Product.find();
+
   return res.status(200).json({
     success: true,
     count: products.length,
+    totalCount: totalCount.length,
     products,
   });
 });
@@ -71,9 +76,10 @@ export const addProduct = catchAsyncError(async (req, res, next) => {
     (discount / req.body.actualPrice) * 100,
     2
   );
+  console.log(req.user);
   let product = new Product({
     ...req.body,
-    userId: req.user.id,
+    userId: req.user._id,
     discount,
     discountPercentage,
   });

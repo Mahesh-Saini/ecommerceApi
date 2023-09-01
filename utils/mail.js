@@ -1,25 +1,31 @@
 import nodemailer from "nodemailer";
 
 export const sendMail = async (user, res, message) => {
+  const MAIL_SERVICE = process.env.MAIL_SERVICE;
+  const MAIL_PORT = process.env.MAIL_PORT;
+  const MAIL_USER = process.env.MAIL_USER;
+  const MAIL_PASS = process.env.MAIL_PASS;
   try {
     const transporter = nodemailer.createTransport({
-      service: process.env.mail_service,
-      port: process.env.mail_port,
+      service: MAIL_SERVICE,
+      port: MAIL_PORT,
       secure: true,
       auth: {
-        user: process.env.mail_user,
-        pass: process.env.mail_pass,
+        user: MAIL_USER,
+        pass: MAIL_PASS,
       },
     });
     const info = await transporter.sendMail({
-      from: process.env.mail_user,
+      from: MAIL_USER,
       to: user.email,
       subject: "Ecommerce password recovery",
       text: message,
     });
 
     if (!info.messageId) {
-      return next(new ErrorHandler("Something went wrong mail not send.", 500));
+      return next(
+        new ErrorHandler("Something went wrong mail did't  sended.", 500)
+      );
     }
     return res.status(200).json({
       success: true,
@@ -30,6 +36,6 @@ export const sendMail = async (user, res, message) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    return next(new ErrorHandler(`Custome ${err.message}`, 500));
+    return next(new ErrorHandler(`Something went wrong ${err.message}`, 500));
   }
 };

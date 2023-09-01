@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Username is required please enter it."],
     trim: true,
-    maxLength: [30, "30 chars"],
-    minLength: [4, "4 chars"],
+    maxLength: [30, "username can't be exceed 30 chars"],
+    minLength: [4, "minimux length of username must be 4 chars"],
   },
   email: {
     type: String,
@@ -20,13 +20,9 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Password is required please enter it."],
-    maxLength: [200, "30 chars"],
-    minLength: [8, "4 chars"],
+    maxLength: [200, "maximum length of password can't be exceed 200 char"],
+    minLength: [8, "minimum length of password must be 8 chars"],
     select: false,
-  },
-  key: {
-    type: String,
-    required: true,
   },
   avatar: {
     publicId: {
@@ -34,6 +30,7 @@ const userSchema = new mongoose.Schema({
     },
     url: {
       type: String,
+      validate: [validator.isURL, "please provide valid url"],
     },
   },
   role: {
@@ -57,17 +54,17 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 12);
+  if (!this.isModified("password")) {
     next();
   }
-  if (this.isModified()) {
-    this.key = CryptoJS.AES.encrypt(
-      this.id,
-      process.env.USER_IDENTITY_KEY
-    ).toString();
-    next();
-  }
+  // if (this.isModified()) {
+  //   this.key = CryptoJS.AES.encrypt(
+  //     this.id,
+  //     process.env.USER_IDENTITY_KEY
+  //   ).toString();
+  //   next();
+  // }
+  this.password = await bcrypt.hash(this.password, 12);
   next();
 });
 
